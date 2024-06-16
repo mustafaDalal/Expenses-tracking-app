@@ -1,12 +1,18 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
+//    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
 }
 
 android {
     namespace = "com.example.myapplication"
     compileSdk = 33
+
+    buildFeatures{
+
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -22,14 +28,25 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+        }
+
+        release {
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+
+    }
+    kapt {
+        correctErrorTypes = true
+        javacOptions {
+            option("-Xmaxerrs", 500)
+        }
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -45,11 +62,16 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    dataBinding {
+        enable = true
+    }
 }
 
 dependencies {
     val roomVersion = "2.5.0"
-    val lifecycleVersion = "2.8.1"
+    val lifecycleVersion = "2.5.0"
+    val daggerVersion = "2.42"
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
@@ -69,7 +91,7 @@ dependencies {
 
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
@@ -78,7 +100,7 @@ dependencies {
     // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
-    implementation("com.google.dagger:dagger:2.2")
-    ksp("com.google.dagger:dagger-compiler:2.2")
+    implementation("com.google.dagger:dagger:$daggerVersion")
+    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
 
 }
