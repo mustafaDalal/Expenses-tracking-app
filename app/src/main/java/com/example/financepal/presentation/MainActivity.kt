@@ -2,14 +2,11 @@ package com.example.financepal.presentation
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,13 +15,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
-import com.example.financepal.data.db.Transaction
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.financepal.di.Injector
 import com.example.financepal.ui.theme.MyApplicationTheme
+import com.example.financepal.utils.NavigationItem
 import com.example.financepal.utils.ToastUtils
 import com.example.financepal.viewmodel.ExpensesViewModel
 import com.example.financepal.viewmodel.ExpensesViewModelFactory
@@ -32,8 +33,6 @@ import com.example.myapplication.R
 import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
-
-    private lateinit var mContext: Context
     private var TAG : String = ""
 
     init {
@@ -46,8 +45,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        mContext = this
         (application as Injector).createExpensesSubcomponent().inject(this)
 
         expensesViewModel = ViewModelProvider(this, factory)
@@ -59,7 +56,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
-                    content = {MainScreen(mContext, expensesViewModel)}
+                    content = {MainScreen(this)}
                 )
             }
         }
@@ -77,12 +74,74 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MainScreen(mContext: Context, mViewModel: ExpensesViewModel) {
+private fun MainScreen(mContext: Context) {
 
+    val navController = rememberNavController()
+    val showFab by expensesViewModel.showFab
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {HomeToolbar()},
-        content = {ContentScreen(it, mViewModel, mContext)},
-        floatingActionButton = {FAB(mContext, mViewModel)} )
+        bottomBar = { BottomAppBar(navController) },
+        floatingActionButton = {
+            if (showFab) {
+                FAB(mContext)
+            }
+        }){ paddingValues ->
+        AppNavHost(paddingValues = paddingValues, navController = navController)
+    }
+}
+
+    @Composable
+    private fun BottomAppBar(navController: NavHostController) {
+        NavigationBar {
+            val currentRoute = currentRoute(navController)
+            getListOfScreens().forEach { screen ->
+                NavigationBarItem(
+                    icon = { Icon(screen.icon, contentDescription = null) },
+                    label = { Text(screen.route) },
+                    selected = currentRoute == screen.route,
+                    onClick = {
+                        navController.navigate(screen.route) {
+                            // Pop up to the start destination of the graph to avoid building up a large stack of destinations
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            // Avoid multiple copies of the same destination when reselecting the same item
+                            launchSingleTop = true
+                            // Restore state when reselecting a previously selected item
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun currentRoute(navController: NavHostController): String? {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        return navBackStackEntry?.destination?.route
+    }
+
+@Composable
+private fun AppNavHost(paddingValues: PaddingValues,
+                       modifier : Modifier = Modifier,
+                       navController: NavHostController,
+                       startDestination: String = NavigationItem.Home.route) {
+    NavHost(
+        modifier = modifier.padding(paddingValues),
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        composable(NavigationItem.Home.route) {
+            expensesViewModel.setShowFab(true)
+            HomeScreen(navController, expensesViewModel)
+        }
+        composable(NavigationItem.Settings.route) {
+            expensesViewModel.setShowFab(false)
+            SettingsScreen(navController, expensesViewModel)
+        }
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,9 +160,9 @@ private fun HomeToolbar() {
 }
 
 @Composable
-private fun FAB(mContext: Context, expensesViewModel: ExpensesViewModel) {
+private fun FAB(mContext: Context) {
     FloatingActionButton(
-        onClick = { showAddExpensesDialog(mContext, expensesViewModel)},
+        onClick = { showAddExpensesDialog(mContext)},
         containerColor = colorResource(R.color.black),
         content = {
             Icon(
@@ -115,80 +174,13 @@ private fun FAB(mContext: Context, expensesViewModel: ExpensesViewModel) {
     )
 }
 
-fun showAddExpensesDialog(mContext: Context, expensesViewModel: ExpensesViewModel) {
+fun showAddExpensesDialog(mContext: Context) {
     ToastUtils.showShortToast(mContext = mContext, "show Add expense dialog")
 
     expensesViewModel.setShowAddExpenseDialog(true)
 }
 
-@Composable
-private fun ContentScreen(paddingValues: PaddingValues, mViewModel: ExpensesViewModel, mContext: Context) {
-    Row(horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(paddingValues)){
-
-        val expensesList by mViewModel.expensesList.observeAsState(initial = emptyList())
-        Text(text = "Expenses ${expensesList.size}", fontSize = 16.sp)
-
-        if(mViewModel.showAddExpenseDialog.value){
-            AddExpenseDialog(mViewModel)
-        }
-    }
-}
-
-private fun onDismiss(amount: String?, mViewModel: ExpensesViewModel) {
-    Log.d("MainActivity", "amount : $amount")
-    amount.takeIf { !it.isNullOrEmpty() }?.let {
-        val amountInInteger = Integer.parseInt(it)
-        if(amountInInteger != 0){
-            mViewModel.updateExpensesList(getTransaction(amountInInteger))
-        }
-    }
-    mViewModel.setShowAddExpenseDialog(false)
-}
-
-fun getTransaction(amount: Int): Transaction = Transaction(0, amount, System.currentTimeMillis())
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AddExpenseDialog(mViewModel: ExpensesViewModel) {
-    var amount by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = {onDismiss(amount, mViewModel)},
-        title = {
-            Text(text = "Enter Amount")
-        },
-        text = {
-            Column {
-                TextField(
-                    value = amount,
-                    onValueChange = { newAmount ->
-                        if (newAmount.all { it.isDigit() }) {
-                            amount = newAmount
-                        }
-                    },
-                    label = { Text("Amount") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onDismiss(amount, mViewModel)
-                }
-            ) {
-                Text("Submit")
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = {onDismiss(null, mViewModel)}
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
-
+private fun getListOfScreens() =  listOf(
+    NavigationItem.Home,
+    NavigationItem.Settings)
 }

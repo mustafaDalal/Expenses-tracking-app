@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "expenses_table")
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
-    val id : Int,
+    val id : Int = 0,
     val amount : Int,
     val timestamp : Long
 )

@@ -104,4 +104,6 @@ dependencies {
     implementation("com.google.dagger:dagger:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
 
+    implementation("androidx.navigation:navigation-compose:2.5.1")
+
 }
