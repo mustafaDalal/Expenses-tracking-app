@@ -1,9 +1,7 @@
 package com.example.financepal.di
 
-import com.example.financepal.domain.DeleteAllExpenses
-import com.example.financepal.domain.DeleteExpense
-import com.example.financepal.domain.GetExpenses
-import com.example.financepal.domain.UpdateExpenses
+import com.example.financepal.domain.*
+import com.example.financepal.domain.repositories.BudgetRepository
 import com.example.financepal.domain.repositories.ExpensesRepository
 import dagger.Module
 import dagger.Provides
@@ -32,4 +30,14 @@ class UseCasesModule {
 
         return DeleteAllExpenses(repository)
     }
+
+    @Provides
+    fun providesUpdateBudgetUseCase(repository: BudgetRepository) : UpdateBudget{
+        return UpdateBudget(repository)
+    }
+    @Provides
+    fun providesGetBudgetUseCase(repository: BudgetRepository) : GetBudget{
+        return GetBudget(repository)
+    }
+
 }

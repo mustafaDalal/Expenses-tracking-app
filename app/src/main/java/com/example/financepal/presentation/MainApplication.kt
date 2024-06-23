@@ -1,7 +1,6 @@
 package com.example.financepal.presentation
 
 import android.app.Application
-import android.content.Context
 import com.example.financepal.di.AppModule
 import com.example.financepal.di.DaggerMainComponent
 import com.example.financepal.di.Injector

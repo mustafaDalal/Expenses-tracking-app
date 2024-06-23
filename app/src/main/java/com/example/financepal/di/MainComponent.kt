@@ -1,8 +1,6 @@
 package com.example.financepal.di
 
 import com.example.financepal.di.subcomonents.ExpensesViewmodelSubcomponent
-import com.example.financepal.domain.repositories.ExpensesRepository
-import com.example.financepal.presentation.MainActivity
 import dagger.Component
 import javax.inject.Singleton
 
@@ -12,6 +10,7 @@ import javax.inject.Singleton
         AppModule::class,
         ExpensesLocalDatabaseModule::class,
         ExpensesRepositoryModule::class,
+        BudgetRepositoryModule::class,
         UseCasesModule::class
     ])
 interface MainComponent {

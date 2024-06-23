@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            MyApplicationTheme {
+            MyApplicationTheme() {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -68,9 +68,6 @@ class MainActivity : ComponentActivity() {
     private fun init() {
 
     }
-}
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,7 +145,7 @@ private fun AppNavHost(paddingValues: PaddingValues,
 @Composable
 private fun HomeToolbar() {
     TopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Blue, titleContentColor = Color.Black),
+        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = colorResource(R.color.toolbar_color), titleContentColor = Color.Black),
         title = {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(7.dp)) { Text(
                 text = stringResource(R.string.app_name),
