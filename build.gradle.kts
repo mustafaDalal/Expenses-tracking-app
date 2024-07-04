@@ -8,8 +8,11 @@ plugins {
 //1.8.0-1.0.8
 buildscript{
 
+    val hiltVersion: String by project
+
     dependencies{
         classpath("com.android.tools.build:gradle:3.2.0")
+        classpath("com.google.dagger:hilt-android-gradle-plugin:$hiltVersion")
     }
 
 }

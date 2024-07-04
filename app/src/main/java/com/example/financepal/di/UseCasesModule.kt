@@ -5,8 +5,11 @@ import com.example.financepal.domain.repositories.BudgetRepository
 import com.example.financepal.domain.repositories.ExpensesRepository
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 @Module
+@InstallIn(SingletonComponent::class)
 class UseCasesModule {
     @Provides
     fun providesGetExpensesUseCase(repository: ExpensesRepository) : GetExpenses{

@@ -23,15 +23,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.financepal.di.Injector
 import com.example.financepal.ui.theme.MyApplicationTheme
 import com.example.financepal.utils.NavigationItem
 import com.example.financepal.utils.ToastUtils
 import com.example.financepal.viewmodel.ExpensesViewModel
 import com.example.financepal.viewmodel.ExpensesViewModelFactory
 import com.example.myapplication.R
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private var TAG : String = ""
 
@@ -45,7 +46,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (application as Injector).createExpensesSubcomponent().inject(this)
 
         expensesViewModel = ViewModelProvider(this, factory)
             .get(ExpensesViewModel::class.java)

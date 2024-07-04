@@ -7,9 +7,12 @@ import com.example.financepal.data.repository.ExpensesRepositoryImpl
 import com.example.financepal.domain.repositories.ExpensesRepository
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
+@InstallIn(SingletonComponent::class)
 class ExpensesRepositoryModule {
     @Provides
     @Singleton

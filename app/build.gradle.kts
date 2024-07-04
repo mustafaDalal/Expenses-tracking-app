@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 //    id("com.google.devtools.ksp")
     id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -71,7 +72,8 @@ android {
 dependencies {
     val roomVersion = "2.5.0"
     val lifecycleVersion = "2.5.0"
-    val daggerVersion = "2.42"
+//    val daggerVersion = "2.42"
+    val hiltVersion: String by project
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
@@ -101,8 +103,11 @@ dependencies {
     // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
-    implementation("com.google.dagger:dagger:$daggerVersion")
-    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
+//    implementation("com.google.dagger:dagger:$daggerVersion")
+//    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
+
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    kapt ("com.google.dagger:hilt-android-compiler:$hiltVersion")
 
     implementation("androidx.navigation:navigation-compose:2.5.1")
 
